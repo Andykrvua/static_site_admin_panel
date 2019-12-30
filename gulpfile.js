@@ -79,3 +79,5 @@ gulp.task(
     "copy-assets"
   )
 );
+
+gulp.task("default", gulp.parallel("watch", "build"));
