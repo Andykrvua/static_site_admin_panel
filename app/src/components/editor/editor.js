@@ -19,10 +19,12 @@ export default class Editor extends Component {
     axios.get("./api").then(res => this.setState({ pageList: res.data }));
   }
 
+  createNewPage() {}
+
   render() {
     const { pageList } = this.state;
     const pages = pageList.map((page, i) => {
-      return <div key={i}>{page}</div>;
+      return <h1 key={i}>{page}</h1>;
     });
 
     return (
