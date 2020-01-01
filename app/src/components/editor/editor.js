@@ -28,7 +28,12 @@ export default class Editor extends Component {
   open(page) {
     this.currentPage = `../${page}`;
     this.iframe.load(this.currentPage, () => {
-      console.log(this.currentPage);
+      const body = this.iframe.contentDocument.body;
+      console.log(body);
+
+      body.childNodes.forEach(node => {
+        console.log(node);
+      });
     });
   }
 

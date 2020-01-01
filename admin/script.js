@@ -129,7 +129,11 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
   open(page) {
     this.currentPage = `../${page}`;
     this.iframe.load(this.currentPage, () => {
-      console.log(this.currentPage);
+      const body = this.iframe.contentDocument.body;
+      console.log(body);
+      body.childNodes.forEach(node => {
+        console.log(node);
+      });
     });
   }
 
