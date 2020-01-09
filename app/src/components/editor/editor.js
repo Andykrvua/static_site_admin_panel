@@ -28,21 +28,27 @@ export default class Editor extends Component {
   open(page) {
     this.currentPage = `../${page}`;
     this.iframe.load(this.currentPage, () => {
+      // document.location.reload(true);
+      // this.iframe.contentDocument.location.reload(true);
       const body = this.iframe.contentDocument.body;
       let textNodes = [];
+      console.log(this.iframe.src);
 
-      if (body.childNodes.length < 1) {
-        // this.open(page);
-        console.log("body: " + body.childNodes.length);
+      if (body.childNodes.length === 0) {
+        console.log("try" + body.childNodes.length);
+        this.open(page);
+        // document.location.reload(true);
       }
-      console.log("body2: " + body.childNodes.length);
+
       function recursy(element) {
         element.childNodes.forEach(node => {
+          // console.log(node);
           if (
             node.nodeName === "#text" &&
             node.nodeValue.replace(/\s+/g, "").length > 0
           ) {
             textNodes.push(node);
+            // console.log(node);
           } else {
             recursy(node);
           }
@@ -50,16 +56,29 @@ export default class Editor extends Component {
       }
 
       recursy(body);
-
+      body.setAttribute("contentEditable", true);
       textNodes.forEach(node => {
+        // console.log(node);
         const wrapper = this.iframe.contentDocument.createElement(
           "text-editor"
         );
         node.parentNode.replaceChild(wrapper, node);
         wrapper.appendChild(node);
-        wrapper.contentEditable = "true";
+        // wrapper.contentEditable = "true";
+        wrapper.setAttribute("contentEditable", true);
+        console.log(wrapper);
       });
     });
+
+    // const body2 = this.iframe.contentDocument.body;
+    // if (body2.hasAttribute("contentEditable")) {
+    //   alert("dd");
+    //   console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    // } else {
+    //   document.location.reload(true);
+    //   this.open(page);
+    //   console.log("sssssssssssssssssssssssssssssssssssssssssssssss");
+    // }
   }
 
   loadPageList() {
