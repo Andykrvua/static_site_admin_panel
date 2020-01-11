@@ -130,50 +130,77 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
   }
 
   open(page) {
-    this.currentPage = `../${page}`;
-    this.iframe.load(this.currentPage, () => {
-      // document.location.reload(true);
-      // this.iframe.contentDocument.location.reload(true);
-      const body = this.iframe.contentDocument.body;
-      let textNodes = [];
-      console.log(this.iframe.src);
+    this.currentPage = `../${page}?rnd=${Math.random().toString().substring(2)}`;
+    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(`../${page}`) // получаем код страницы в текстовом виде
+    .then(res => this.parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
+    .then(this.wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
+    .then(dom => {
+      this.virtualDom = dom; // создаем чистую копию редактируемого файла
 
-      if (body.childNodes.length === 0) {
-        console.log("try" + body.childNodes.length);
-        this.open(page); // document.location.reload(true);
-      }
+      return dom; // что бы не обрывать цепочку вызовов вернем ранее полученный dom
+    }).then(this.serializeDOMToString) // готовим к отправке в php, переводим в строку
+    .then(html => axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/saveTempPage.php", {
+      html
+    })) // отправляем в api для сохранения
+    .then(() => this.iframe.load("./../temp.html")) // получаем сохраненную копию
+    .then(() => this.enableEditing()); // включаем редактирование
+  }
 
-      function recursy(element) {
-        element.childNodes.forEach(node => {
-          // console.log(node);
-          if (node.nodeName === "#text" && node.nodeValue.replace(/\s+/g, "").length > 0) {
-            textNodes.push(node); // console.log(node);
-          } else {
-            recursy(node);
-          }
-        });
-      }
+  save() {
+    const newDom = this.virtualDom.cloneNode(this.virtualDom);
+  }
 
-      recursy(body);
-      body.setAttribute("contentEditable", true);
-      textNodes.forEach(node => {
-        // console.log(node);
-        const wrapper = this.iframe.contentDocument.createElement("text-editor");
-        node.parentNode.replaceChild(wrapper, node);
-        wrapper.appendChild(node); // wrapper.contentEditable = "true";
-
-        wrapper.setAttribute("contentEditable", true);
-        console.log(wrapper);
+  enableEditing() {
+    this.iframe.contentDocument.body.querySelectorAll("text-editor").forEach(element => {
+      element.contentEditable = "true";
+      element.addEventListener("input", () => {
+        this.onTextEdit(element); // вешаем обработчик на каждый редактируемый элемент
       });
-    }); // const body2 = this.iframe.contentDocument.body;
-    // if (body2.hasAttribute("contentEditable")) {
-    //   alert("dd");
-    //   console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    // } else {
-    //   document.location.reload(true);
-    //   this.open(page);
-    //   console.log("sssssssssssssssssssssssssssssssssssssssssssssss");
-    // }
+    });
+  }
+
+  onTextEdit(element) {
+    const id = element.getAttribute("nodeid");
+    this.virtualDom.body.querySelector(`[nodeid="${id}"]`).innerHTML = element.innerHTML;
+    console.log(this.virtualDom);
+    console.log(`[nodeid="${id}"]`);
+  }
+
+  parseStrToDom(str) {
+    // превращаем страницу в dom элементы, может быть ошибка с svg! проверить
+    const parser = new DOMParser();
+    return parser.parseFromString(str, "text/html");
+  }
+
+  wrapTextNodes(dom) {
+    // метод оборачивающий все нужные узлы в кастомный компонент
+    const body = dom.body;
+    let textNodes = [];
+
+    function recursy(element) {
+      element.childNodes.forEach(node => {
+        if (node.nodeName === "#text" && node.nodeValue.replace(/\s+/g, "").length > 0) {
+          textNodes.push(node);
+        } else {
+          recursy(node);
+        }
+      });
+    }
+
+    recursy(body);
+    textNodes.forEach((node, i) => {
+      const wrapper = dom.createElement("text-editor");
+      node.parentNode.replaceChild(wrapper, node);
+      wrapper.appendChild(node);
+      wrapper.setAttribute("nodeid", i); // установим id для каждой ноды
+    });
+    return dom;
+  }
+
+  serializeDOMToString(dom) {
+    // метод переводит dom в строку для обработки в php
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(dom);
   }
 
   loadPageList() {
@@ -216,10 +243,10 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     //   );
     // });
 
-    return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("iframe", {
+    return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("iframe", {
       src: this.currentPage,
       frameBorder: "0"
-    }) // <>
+    })) // <>
     //   <input
     //     type="text"
     //     value={this.state.newPageName}
