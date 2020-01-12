@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import axios from "axios";
 import "./../../helpers/iframeLoader.js";
+import DOMHelper from "./../../helpers/dom-helper.js";
+import EditorText from "./../editor-text";
+import UIkit from "uikit";
+import Spinner from "./../spinner";
 
 export default class Editor extends Component {
   constructor() {
@@ -10,9 +14,12 @@ export default class Editor extends Component {
 
     this.state = {
       pageList: [],
-      newPageName: ""
+      newPageName: "",
+      loading: true
     };
     this.createNewPage = this.createNewPage.bind(this);
+    this.isLoading = this.isLoading.bind(this);
+    this.isLoaded = this.isLoaded.bind(this);
   }
 
   componentDidMount() {
@@ -21,91 +28,78 @@ export default class Editor extends Component {
 
   init(page) {
     this.iframe = document.querySelector("iframe");
-    this.open(page);
+    this.open(page, this.isLoaded);
     this.loadPageList();
   }
 
-  open(page) {
-    this.currentPage = `../${page}?rnd=${Math.random()
-      .toString()
-      .substring(2)}`;
+  open(page, cb) {
+    this.currentPage = page;
 
     axios
-      .get(`../${page}`) // получаем код страницы в текстовом виде
-      .then(res => this.parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
-      .then(this.wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
+      .get(
+        `../${page}?rnd=${Math.random()
+          .toString()
+          .substring(2)}`
+      ) // получаем код страницы в текстовом виде
+      .then(res => DOMHelper.parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
+      .then(DOMHelper.wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
       .then(dom => {
         this.virtualDom = dom; // создаем чистую копию редактируемого файла
         return dom; // что бы не обрывать цепочку вызовов вернем ранее полученный dom
       })
-      .then(this.serializeDOMToString) // готовим к отправке в php, переводим в строку
+      .then(DOMHelper.serializeDOMToString) // готовим к отправке в php, переводим в строку
       .then(html => axios.post("./api/saveTempPage.php", { html })) // отправляем в api для сохранения
       .then(() => this.iframe.load("./../temp.html")) // получаем сохраненную копию
-      .then(() => this.enableEditing()); // включаем редактирование
+      .then(() => this.enableEditing()) // включаем редактирование
+      .then(() => this.injectStyles())
+      .then(cb);
   }
 
-  save() {
+  save(onSuccess, onError) {
+    // сохраняем данные после редактирования
+
+    this.isLoading();
+
+    // создаем копию отредактированного dom дерева
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
+
+    // передаем методу что бы убрать кастомную обертку
+    DOMHelper.unwrapTextNodes(newDom);
+
+    // переводим в строку для отправки в php обработчик
+    const html = DOMHelper.serializeDOMToString(newDom);
+    axios
+      .post("./api/savePage.php", { pageName: this.currentPage, html })
+      .then(onSuccess)
+      .catch(onError)
+      .finally(this.isLoaded);
   }
 
   enableEditing() {
     this.iframe.contentDocument.body
       .querySelectorAll("text-editor")
       .forEach(element => {
-        element.contentEditable = "true";
-        element.addEventListener("input", () => {
-          this.onTextEdit(element); // вешаем обработчик на каждый редактируемый элемент
-        });
+        const id = element.getAttribute("nodeid");
+        const virtualElement = this.virtualDom.body.querySelector(
+          `[nodeid="${id}"]`
+        );
+        // передаем в констурктор элемент с нашего temp файла и тот же элемент с чистого dom дерева
+        new EditorText(element, virtualElement);
       });
   }
 
-  onTextEdit(element) {
-    const id = element.getAttribute("nodeid");
-    this.virtualDom.body.querySelector(`[nodeid="${id}"]`).innerHTML =
-      element.innerHTML;
-    console.log(this.virtualDom);
-    console.log(`[nodeid="${id}"]`);
-  }
-
-  parseStrToDom(str) {
-    // превращаем страницу в dom элементы, может быть ошибка с svg! проверить
-    const parser = new DOMParser();
-    return parser.parseFromString(str, "text/html");
-  }
-
-  wrapTextNodes(dom) {
-    // метод оборачивающий все нужные узлы в кастомный компонент
-    const body = dom.body;
-    let textNodes = [];
-
-    function recursy(element) {
-      element.childNodes.forEach(node => {
-        if (
-          node.nodeName === "#text" &&
-          node.nodeValue.replace(/\s+/g, "").length > 0
-        ) {
-          textNodes.push(node);
-        } else {
-          recursy(node);
-        }
-      });
+  injectStyles() {
+    const style = this.iframe.contentDocument.createElement("style");
+    style.innerHTML = `
+    text-editor:hover {
+      outline: 2px solid coral;
+      outline-offset: 5px;
     }
-
-    recursy(body);
-    textNodes.forEach((node, i) => {
-      const wrapper = dom.createElement("text-editor");
-      node.parentNode.replaceChild(wrapper, node);
-      wrapper.appendChild(node);
-      wrapper.setAttribute("nodeid", i); // установим id для каждой ноды
-    });
-
-    return dom;
-  }
-
-  serializeDOMToString(dom) {
-    // метод переводит dom в строку для обработки в php
-    const serializer = new XMLSerializer();
-    return serializer.serializeToString(dom);
+    text-editor:focus {
+      outline: 2px solid orange;
+      outline-offset: 5px;
+    }`;
+    this.iframe.contentDocument.head.appendChild(style);
   }
 
   loadPageList() {
@@ -133,8 +127,24 @@ export default class Editor extends Component {
       .catch(() => alert("Что-то пошло не так"));
   }
 
+  isLoading() {
+    this.setState({
+      loading: true
+    });
+  }
+
+  isLoaded() {
+    this.setState({
+      loading: false
+    });
+  }
+
   render() {
-    console.log("render");
+    const modal = true;
+    const { loading } = this.state;
+    let spinner;
+    loading ? (spinner = <Spinner active />) : (spinner = <Spinner />);
+    // console.log("render");
     // const { pageList } = this.state;
     // const pages = pageList.map((page, i) => {
     //   return (
@@ -149,7 +159,57 @@ export default class Editor extends Component {
 
     return (
       <>
+        {console.log("render")}
+
         <iframe src={this.currentPage} frameBorder="0"></iframe>
+
+        {spinner}
+
+        <div className="panel">
+          <button
+            uk-toggle="target: #modal-save"
+            className="uk-button uk-button-primary"
+          >
+            Сохранить
+          </button>
+        </div>
+
+        <div id="modal-save" uk-modal={modal.toString()}>
+          <div className="uk-modal-dialog uk-modal-body">
+            <h2 className="uk-modal-title">Сохранение</h2>
+            <p>Вы действительно хотите сохранить изменения?</p>
+            <p className="uk-text-right">
+              <button
+                className="uk-button uk-button-default uk-modal-close"
+                type="button"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={() =>
+                  this.save(
+                    () => {
+                      UIkit.notification({
+                        message: "Изменения сохранены",
+                        status: "success"
+                      });
+                    },
+                    () => {
+                      UIkit.notification({
+                        message: "Ошибка сохранения",
+                        status: "danger"
+                      });
+                    }
+                  )
+                } // обернули в анонимную функцию что бы сохранить контекст, иначе нужен bind в конструторе
+                className="uk-button uk-button-primary uk-modal-close"
+                type="button"
+              >
+                Сохранить
+              </button>
+            </p>
+          </div>
+        </div>
       </>
       // <>
       //   <input
