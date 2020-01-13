@@ -17,27 +17,45 @@ export default class EditorMeta extends Component {
   }
 
   getMeta(virtualDom) {
-    let title =
+    this.title =
       virtualDom.head.querySelector("title") ||
       virtualDom.head.appendChild(virtualDom.createElement("title"));
-    let description = virtualDom.head.querySelector("meta[name='description']");
-    if (!description) {
-      description = virtualDom.head.appendChild(
+    this.description = virtualDom.head.querySelector(
+      "meta[name='description']"
+    );
+    if (!this.description) {
+      this.description = virtualDom.head.appendChild(
         virtualDom.createElement("meta")
       );
-      description.setAttribute("name", "description");
+      this.description.setAttribute("name", "description");
     }
-    let keywords = virtualDom.head.querySelector("meta[name='keywords']");
-    if (!keywords) {
-      keywords = virtualDom.head.appendChild(virtualDom.createElement("meta"));
-      keywords.setAttribute("name", "keywords");
+    this.keywords = virtualDom.head.querySelector("meta[name='keywords']");
+    if (!this.keywords) {
+      this.keywords = virtualDom.head.appendChild(
+        virtualDom.createElement("meta")
+      );
+      this.keywords.setAttribute("name", "keywords");
     }
 
     this.setState({
       meta: {
-        title: title.innerHTML,
-        description: description.getAttribute("content"),
-        keywords: keywords.getAttribute("content")
+        title: this.title.innerHTML,
+        description: this.description.getAttribute("content"),
+        keywords: this.keywords.getAttribute("content")
+      }
+    });
+  }
+
+  applyMeta() {
+    this.title.innerHTML = this.state.meta.title;
+    this.description.setAttribute("content", this.state.meta.description);
+    this.keywords.setAttribute("content", this.state.meta.keywords);
+  }
+
+  onValueChange(e) {
+    this.setState({
+      meta: {
+        title: e.target.value
       }
     });
   }
@@ -54,28 +72,34 @@ export default class EditorMeta extends Component {
           <form>
             <div className="uk-margin">
               <input
+                data-title
                 className="uk-input"
                 type="text"
                 placeholder="Title"
                 value={title}
+                onChange={e => this.onValueChange(e)}
               />
             </div>
 
             <div className="uk-margin">
               <textarea
+                data-descr
                 className="uk-textarea"
                 rows="5"
                 placeholder="Description"
                 value={description}
+                onChange={e => this.onValueChange(e)}
               ></textarea>
             </div>
 
             <div className="uk-margin">
               <textarea
+                data-key
                 className="uk-textarea"
                 rows="5"
                 placeholder="Keywords"
                 value={keywords}
+                onChange={e => this.onValueChange(e)}
               ></textarea>
             </div>
           </form>
@@ -90,6 +114,9 @@ export default class EditorMeta extends Component {
             <button
               className="uk-button uk-button-primary uk-modal-close"
               type="button"
+              onClick={() => {
+                this.applyMeta();
+              }}
             >
               Сохранить
             </button>

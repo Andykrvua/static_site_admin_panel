@@ -266,26 +266,40 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
   }
 
   getMeta(virtualDom) {
-    let title = virtualDom.head.querySelector("title") || virtualDom.head.appendChild(virtualDom.createElement("title"));
-    let description = virtualDom.head.querySelector("meta[name='description']");
+    this.title = virtualDom.head.querySelector("title") || virtualDom.head.appendChild(virtualDom.createElement("title"));
+    this.description = virtualDom.head.querySelector("meta[name='description']");
 
-    if (!description) {
-      description = virtualDom.head.appendChild(virtualDom.createElement("meta"));
-      description.setAttribute("name", "description");
+    if (!this.description) {
+      this.description = virtualDom.head.appendChild(virtualDom.createElement("meta"));
+      this.description.setAttribute("name", "description");
     }
 
-    let keywords = virtualDom.head.querySelector("meta[name='keywords']");
+    this.keywords = virtualDom.head.querySelector("meta[name='keywords']");
 
-    if (!keywords) {
-      keywords = virtualDom.head.appendChild(virtualDom.createElement("meta"));
-      keywords.setAttribute("name", "keywords");
+    if (!this.keywords) {
+      this.keywords = virtualDom.head.appendChild(virtualDom.createElement("meta"));
+      this.keywords.setAttribute("name", "keywords");
     }
 
     this.setState({
       meta: {
-        title: title.innerHTML,
-        description: description.getAttribute("content"),
-        keywords: keywords.getAttribute("content")
+        title: this.title.innerHTML,
+        description: this.description.getAttribute("content"),
+        keywords: this.keywords.getAttribute("content")
+      }
+    });
+  }
+
+  applyMeta() {
+    this.title.innerHTML = this.state.meta.title;
+    this.description.setAttribute("content", this.state.meta.description);
+    this.keywords.setAttribute("content", this.state.meta.keywords);
+  }
+
+  onValueChange(e) {
+    this.setState({
+      meta: {
+        title: e.target.value
       }
     });
   }
@@ -310,24 +324,30 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
     }, "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u041C\u0435\u0442\u0430\u0442\u0435\u0433\u043E\u0432"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("form", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
       className: "uk-margin"
     }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
+      "data-title": true,
       className: "uk-input",
       type: "text",
       placeholder: "Title",
-      value: title
+      value: title,
+      onChange: e => this.onValueChange(e)
     })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
       className: "uk-margin"
     }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("textarea", {
+      "data-descr": true,
       className: "uk-textarea",
       rows: "5",
       placeholder: "Description",
-      value: description
+      value: description,
+      onChange: e => this.onValueChange(e)
     })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
       className: "uk-margin"
     }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("textarea", {
+      "data-key": true,
       className: "uk-textarea",
       rows: "5",
       placeholder: "Keywords",
-      value: keywords
+      value: keywords,
+      onChange: e => this.onValueChange(e)
     }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
       className: "uk-text-right"
     }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
@@ -335,7 +355,10 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
       type: "button"
     }, "\u041E\u0442\u043C\u0435\u043D\u0430"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
       className: "uk-button uk-button-primary uk-modal-close",
-      type: "button"
+      type: "button",
+      onClick: () => {
+        this.applyMeta();
+      }
     }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))));
   }
 
