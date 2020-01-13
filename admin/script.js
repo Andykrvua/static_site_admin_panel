@@ -86,6 +86,278 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/src/components/choose-modal/choose-modal.js":
+/*!*********************************************************!*\
+  !*** ./app/src/components/choose-modal/choose-modal.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const ChooseModal = ({
+  modal,
+  target,
+  data,
+  redirect
+}) => {
+  const list = data.map(item => {
+    if (item.time) {
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        key: item.file
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        className: "uk-link-muted uk-modal-close",
+        href: "#",
+        onClick: e => redirect(e, item.file)
+      }, "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u0430\u044F \u043A\u043E\u043F\u0438\u044F \u043E\u0442 ", item.time));
+    } else {
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
+        key: item
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+        className: "uk-link-muted uk-modal-close",
+        href: "#",
+        onClick: e => redirect(e, item)
+      }, item));
+    }
+  });
+  let msg;
+
+  if (data.length < 1) {
+    msg = react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u043F\u043E\u044F\u0432\u044F\u0442\u0441\u044F \u043F\u043E\u0441\u043B\u0435 \u0432\u043D\u0435\u0441\u0435\u043D\u0438\u044F \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u0439.");
+  }
+
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    id: target,
+    "uk-modal": modal.toString()
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "uk-modal-dialog uk-modal-body"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+    className: "uk-modal-title"
+  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C"), msg, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("ul", {
+    className: "uk-list uk-list-divider"
+  }, list), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+    className: "uk-text-right"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    className: "uk-button uk-button-default uk-modal-close",
+    type: "button"
+  }, "\u041E\u0442\u043C\u0435\u043D\u0430"))));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (ChooseModal);
+
+/***/ }),
+
+/***/ "./app/src/components/choose-modal/index.js":
+/*!**************************************************!*\
+  !*** ./app/src/components/choose-modal/index.js ***!
+  \**************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _choose_modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./choose-modal */ "./app/src/components/choose-modal/choose-modal.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_choose_modal__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/confirm-modal/confirm-modal.js":
+/*!***********************************************************!*\
+  !*** ./app/src/components/confirm-modal/confirm-modal.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! uikit */ "./node_modules/uikit/dist/js/uikit.js");
+/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(uikit__WEBPACK_IMPORTED_MODULE_1__);
+
+
+
+const ConfirmModal = ({
+  modal,
+  target,
+  method
+}) => {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    id: target,
+    "uk-modal": modal.toString()
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "uk-modal-dialog uk-modal-body"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+    className: "uk-modal-title"
+  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "\u0412\u044B \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0445\u043E\u0442\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F?"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+    className: "uk-text-right"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    className: "uk-button uk-button-default uk-modal-close uk-margin-small-right",
+    type: "button"
+  }, "\u041E\u0442\u043C\u0435\u043D\u0430"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    onClick: () => method(() => {
+      uikit__WEBPACK_IMPORTED_MODULE_1___default.a.notification({
+        message: "Изменения сохранены",
+        status: "success"
+      });
+    }, () => {
+      uikit__WEBPACK_IMPORTED_MODULE_1___default.a.notification({
+        message: "Ошибка сохранения",
+        status: "danger"
+      });
+    }) // обернули в анонимную функцию что бы сохранить контекст, иначе нужен bind в конструторе
+    ,
+    className: "uk-button uk-button-primary uk-modal-close",
+    type: "button"
+  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (ConfirmModal);
+
+/***/ }),
+
+/***/ "./app/src/components/confirm-modal/index.js":
+/*!***************************************************!*\
+  !*** ./app/src/components/confirm-modal/index.js ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _confirm_modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./confirm-modal */ "./app/src/components/confirm-modal/confirm-modal.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_confirm_modal__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/editor-meta/editor-meta.js":
+/*!*******************************************************!*\
+  !*** ./app/src/components/editor-meta/editor-meta.js ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EditorMeta; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
+  constructor(props) {
+    super(props);
+    this.state = {
+      meta: {
+        title: "",
+        description: "",
+        keywords: ""
+      }
+    };
+  }
+
+  componentDidMount() {
+    this.getMeta(this.props.virtualDom);
+  }
+
+  getMeta(virtualDom) {
+    let title = virtualDom.head.querySelector("title") || virtualDom.head.appendChild(virtualDom.createElement("title"));
+    let description = virtualDom.head.querySelector("meta[name='description']");
+
+    if (!description) {
+      description = virtualDom.head.appendChild(virtualDom.createElement("meta"));
+      description.setAttribute("name", "description");
+    }
+
+    let keywords = virtualDom.head.querySelector("meta[name='keywords']");
+
+    if (!keywords) {
+      keywords = virtualDom.head.appendChild(virtualDom.createElement("meta"));
+      keywords.setAttribute("name", "keywords");
+    }
+
+    this.setState({
+      meta: {
+        title: title.innerHTML,
+        description: description.getAttribute("content"),
+        keywords: keywords.getAttribute("content")
+      }
+    });
+  }
+
+  render() {
+    const {
+      modal,
+      target
+    } = this.props;
+    const {
+      title,
+      keywords,
+      description
+    } = this.state.meta;
+    return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      id: target,
+      "uk-modal": modal.toString()
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "uk-modal-dialog uk-modal-body"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+      className: "uk-modal-title"
+    }, "\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u041C\u0435\u0442\u0430\u0442\u0435\u0433\u043E\u0432"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("form", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "uk-margin"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
+      className: "uk-input",
+      type: "text",
+      placeholder: "Title",
+      value: title
+    })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "uk-margin"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("textarea", {
+      className: "uk-textarea",
+      rows: "5",
+      placeholder: "Description",
+      value: description
+    })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "uk-margin"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("textarea", {
+      className: "uk-textarea",
+      rows: "5",
+      placeholder: "Keywords",
+      value: keywords
+    }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+      className: "uk-text-right"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+      className: "uk-button uk-button-default uk-modal-close uk-margin-small-right",
+      type: "button"
+    }, "\u041E\u0442\u043C\u0435\u043D\u0430"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+      className: "uk-button uk-button-primary uk-modal-close",
+      type: "button"
+    }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))));
+  }
+
+}
+
+/***/ }),
+
+/***/ "./app/src/components/editor-meta/index.js":
+/*!*************************************************!*\
+  !*** ./app/src/components/editor-meta/index.js ***!
+  \*************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _editor_meta__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./editor-meta */ "./app/src/components/editor-meta/editor-meta.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_editor_meta__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
 /***/ "./app/src/components/editor-text/editor-text.js":
 /*!*******************************************************!*\
   !*** ./app/src/components/editor-text/editor-text.js ***!
@@ -178,6 +450,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! uikit */ "./node_modules/uikit/dist/js/uikit.js");
 /* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(uikit__WEBPACK_IMPORTED_MODULE_6__);
 /* harmony import */ var _spinner__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./../spinner */ "./app/src/components/spinner/index.js");
+/* harmony import */ var _confirm_modal__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./../confirm-modal */ "./app/src/components/confirm-modal/index.js");
+/* harmony import */ var _choose_modal__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../choose-modal */ "./app/src/components/choose-modal/index.js");
+/* harmony import */ var _panel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../panel */ "./app/src/components/panel/index.js");
+/* harmony import */ var _editor_meta__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../editor-meta */ "./app/src/components/editor-meta/index.js");
+
+
+
+
 
 
 
@@ -192,22 +472,32 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     this.currentPage = "index.html";
     this.state = {
       pageList: [],
+      backupsList: [],
       newPageName: "",
       loading: true
-    };
-    this.createNewPage = this.createNewPage.bind(this);
+    }; // this.createNewPage = this.createNewPage.bind(this);
+
     this.isLoading = this.isLoading.bind(this);
     this.isLoaded = this.isLoaded.bind(this);
+    this.save = this.save.bind(this);
+    this.init = this.init.bind(this);
+    this.restoreBackup = this.restoreBackup.bind(this);
   }
 
   componentDidMount() {
-    this.init(this.currentPage);
+    this.init(null, this.currentPage);
   }
 
-  init(page) {
+  init(e, page) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    this.isLoading();
     this.iframe = document.querySelector("iframe");
     this.open(page, this.isLoaded);
     this.loadPageList();
+    this.loadBackupsList();
   }
 
   open(page, cb) {
@@ -223,12 +513,15 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     .then(html => axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/saveTempPage.php", {
       html
     })) // отправляем в api для сохранения
-    .then(() => this.iframe.load("./../temp.html")) // получаем сохраненную копию
+    .then(() => this.iframe.load("./../f45ds615dsvvds1v5.html")) // получаем сохраненную копию
+    .then(() => axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/deleteTempPage.php")) // удаляем копию файла
     .then(() => this.enableEditing()) // включаем редактирование
     .then(() => this.injectStyles()).then(cb);
+    this.loadBackupsList();
   }
 
-  save(onSuccess, onError) {
+  async save(onSuccess, onError) {
+    // async говорит что внутри асинхронные операции
     // сохраняем данные после редактирования
     this.isLoading(); // создаем копию отредактированного dom дерева
 
@@ -237,10 +530,12 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapTextNodes(newDom); // переводим в строку для отправки в php обработчик
 
     const html = _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].serializeDOMToString(newDom);
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/savePage.php", {
+    await axios__WEBPACK_IMPORTED_MODULE_2___default.a // await говорит, дождаться окончания запроса прежде чем выполнить this.loadBackupsList();
+    .post("./api/savePage.php", {
       pageName: this.currentPage,
       html
     }).then(onSuccess).catch(onError).finally(this.isLoaded);
+    this.loadBackupsList();
   }
 
   enableEditing() {
@@ -267,31 +562,58 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
   }
 
   loadPageList() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("./api").then(res => this.setState({
+    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("./api/pageList.php").then(res => this.setState({
       pageList: res.data
     }));
   }
 
-  createNewPage() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/createNewPage.php", {
-      name: this.state.newPageName
-    }).then(res => {
-      console.log(res);
-      this.setState({
-        newPageName: ""
-      });
-      this.loadPageList();
-    }).catch(() => alert("Такая страница уже существует"));
+  loadBackupsList() {
+    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("./backups/backups.json").then(res => this.setState({
+      backupsList: res.data.filter(backup => {
+        return backup.page === this.currentPage;
+      })
+    }));
   }
 
-  deletePage(page) {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/deletePage.php", {
-      name: page
-    }).then(res => {
-      console.log(res);
-      this.loadPageList();
-    }).catch(() => alert("Что-то пошло не так"));
-  }
+  restoreBackup(e, backup) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    uikit__WEBPACK_IMPORTED_MODULE_6___default.a.modal.confirm("Вы действительно хотите восстановить страницу из резервной копии? Все внесенные изменения будут утеряны!", {
+      labels: {
+        ok: "Восстановить",
+        cancel: "Отмена"
+      }
+    }).then(() => {
+      this.isLoading();
+      return axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/restoreBackup.php", {
+        page: this.currentPage,
+        file: backup
+      });
+    }).then(() => {
+      this.open(this.currentPage, this.isLoaded);
+    });
+  } // createNewPage() {
+  //   axios
+  //     .post("./api/createNewPage.php", { name: this.state.newPageName })
+  //     .then(res => {
+  //       console.log(res);
+  //       this.setState({ newPageName: "" });
+  //       this.loadPageList();
+  //     })
+  //     .catch(() => alert("Такая страница уже существует"));
+  // }
+  // deletePage(page) {
+  //   axios
+  //     .post("./api/deletePage.php", { name: page })
+  //     .then(res => {
+  //       console.log(res);
+  //       this.loadPageList();
+  //     })
+  //     .catch(() => alert("Что-то пошло не так"));
+  // }
+
 
   isLoading() {
     this.setState({
@@ -308,7 +630,9 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
   render() {
     const modal = true;
     const {
-      loading
+      loading,
+      pageList,
+      backupsList
     } = this.state;
     let spinner;
     loading ? spinner = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_spinner__WEBPACK_IMPORTED_MODULE_7__["default"], {
@@ -327,41 +651,27 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     // });
 
     return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, console.log("render"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("iframe", {
-      src: this.currentPage,
+      src: "",
       frameBorder: "0"
-    }), spinner, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-      className: "panel"
-    }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
-      "uk-toggle": "target: #modal-save",
-      className: "uk-button uk-button-primary"
-    }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C")), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-      id: "modal-save",
-      "uk-modal": modal.toString()
-    }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", {
-      className: "uk-modal-dialog uk-modal-body"
-    }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("h2", {
-      className: "uk-modal-title"
-    }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", null, "\u0412\u044B \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0445\u043E\u0442\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F?"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("p", {
-      className: "uk-text-right"
-    }, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
-      className: "uk-button uk-button-default uk-modal-close",
-      type: "button"
-    }, "\u041E\u0442\u043C\u0435\u043D\u0430"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
-      onClick: () => this.save(() => {
-        uikit__WEBPACK_IMPORTED_MODULE_6___default.a.notification({
-          message: "Изменения сохранены",
-          status: "success"
-        });
-      }, () => {
-        uikit__WEBPACK_IMPORTED_MODULE_6___default.a.notification({
-          message: "Ошибка сохранения",
-          status: "danger"
-        });
-      }) // обернули в анонимную функцию что бы сохранить контекст, иначе нужен bind в конструторе
-      ,
-      className: "uk-button uk-button-primary uk-modal-close",
-      type: "button"
-    }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))))) // <>
+    }), spinner, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_panel__WEBPACK_IMPORTED_MODULE_10__["default"], null), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_confirm_modal__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      modal: modal,
+      target: "modal-save",
+      method: this.save
+    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      modal: modal,
+      target: "modal-open",
+      data: pageList,
+      redirect: this.init
+    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      modal: modal,
+      target: "modal-backup",
+      data: backupsList,
+      redirect: this.restoreBackup
+    }), this.virtualDom ? react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_editor_meta__WEBPACK_IMPORTED_MODULE_11__["default"], {
+      modal: modal,
+      target: "modal-meta",
+      virtualDom: this.virtualDom
+    }) : false) // <>
     //   <input
     //     type="text"
     //     value={this.state.newPageName}
@@ -389,6 +699,56 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./editor */ "./app/src/components/editor/editor.js");
 
 /* harmony default export */ __webpack_exports__["default"] = (_editor__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/panel/index.js":
+/*!*******************************************!*\
+  !*** ./app/src/components/panel/index.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _panel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./panel */ "./app/src/components/panel/panel.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_panel__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/panel/panel.js":
+/*!*******************************************!*\
+  !*** ./app/src/components/panel/panel.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const Panel = () => {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "panel"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    "uk-toggle": "target: #modal-open",
+    className: "uk-button uk-button-primary uk-margin-small-right"
+  }, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    "uk-toggle": "target: #modal-save",
+    className: "uk-button uk-button-primary uk-margin-small-right"
+  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    "uk-toggle": "target: #modal-meta",
+    className: "uk-button uk-button-primary uk-margin-small-right"
+  }, "\u041C\u0435\u0442\u0430\u0442\u0435\u0433\u0438"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    "uk-toggle": "target: #modal-backup",
+    className: "uk-button uk-button-default"
+  }, "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438"));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Panel);
 
 /***/ }),
 

@@ -4,7 +4,7 @@
 // готовим данные для получения 
 $_POST = json_decode(file_get_contents("php://input"), true);
 
-$newFile = "./../../temp.html";
+$newFile = "./../../f45ds615dsvvds1v5.html";
 
 if ($_POST["html"]) {
 
