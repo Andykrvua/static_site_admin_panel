@@ -16,6 +16,12 @@ export default class EditorMeta extends Component {
     this.getMeta(this.props.virtualDom);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.virtualDom !== this.props.virtualDom) {
+      this.getMeta(this.props.virtualDom);
+    }
+  }
+
   getMeta(virtualDom) {
     this.title =
       virtualDom.head.querySelector("title") ||
@@ -28,6 +34,7 @@ export default class EditorMeta extends Component {
         virtualDom.createElement("meta")
       );
       this.description.setAttribute("name", "description");
+      this.description.setAttribute("content", "");
     }
     this.keywords = virtualDom.head.querySelector("meta[name='keywords']");
     if (!this.keywords) {
@@ -35,6 +42,7 @@ export default class EditorMeta extends Component {
         virtualDom.createElement("meta")
       );
       this.keywords.setAttribute("name", "keywords");
+      this.keywords.setAttribute("content", "");
     }
 
     this.setState({
@@ -53,11 +61,46 @@ export default class EditorMeta extends Component {
   }
 
   onValueChange(e) {
-    this.setState({
-      meta: {
-        title: e.target.value
-      }
-    });
+    if (e.target.getAttribute("data-title")) {
+      e.persist(); // для доступа к свойствам событий асинхронным способом
+      this.setState(({ meta }) => {
+        // колбек нужен что бы текущий стейт зависел от предыдущего (отключаем асинхронность)
+        const newMeta = {
+          // что бы избежать отдельных мутаций сначала копируем старый стейт
+          ...meta,
+          title: e.target.value
+        };
+
+        return {
+          // возвращаем новый стейт
+          meta: newMeta
+        };
+      });
+    } else if (e.target.getAttribute("data-key")) {
+      e.persist();
+      this.setState(({ meta }) => {
+        const newMeta = {
+          ...meta,
+          keywords: e.target.value
+        };
+
+        return {
+          meta: newMeta
+        };
+      });
+    } else {
+      e.persist();
+      this.setState(({ meta }) => {
+        const newMeta = {
+          ...meta,
+          description: e.target.value
+        };
+
+        return {
+          meta: newMeta
+        };
+      });
+    }
   }
 
   render() {
@@ -118,7 +161,7 @@ export default class EditorMeta extends Component {
                 this.applyMeta();
               }}
             >
-              Сохранить
+              Применить
             </button>
           </p>
         </div>

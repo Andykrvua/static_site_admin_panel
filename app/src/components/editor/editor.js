@@ -9,6 +9,7 @@ import ConfirmModal from "./../confirm-modal";
 import ChooseModal from "./../choose-modal";
 import Panel from "./../panel";
 import EditorMeta from "./../editor-meta";
+import EditorImages from "./../editor-images";
 
 export default class Editor extends Component {
   constructor() {
@@ -56,6 +57,7 @@ export default class Editor extends Component {
       ) // получаем код страницы в текстовом виде
       .then(res => DOMHelper.parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
       .then(DOMHelper.wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
+      .then(DOMHelper.wrapImages) // передаем DOM в метод, который добавит изображениям атрибут
       .then(dom => {
         this.virtualDom = dom; // создаем чистую копию редактируемого файла
         return dom; // что бы не обрывать цепочку вызовов вернем ранее полученный dom
@@ -80,8 +82,8 @@ export default class Editor extends Component {
     // создаем копию отредактированного dom дерева
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
 
-    // передаем методу что бы убрать кастомную обертку
-    DOMHelper.unwrapTextNodes(newDom);
+    DOMHelper.unwrapTextNodes(newDom); // передаем методу что бы убрать кастомную обертку
+    DOMHelper.unwrapImages(newDom); // передаем методу что бы убрать атрибут с изображений
 
     // переводим в строку для отправки в php обработчик
     const html = DOMHelper.serializeDOMToString(newDom);
@@ -105,6 +107,16 @@ export default class Editor extends Component {
         // передаем в констурктор элемент с нашего temp файла и тот же элемент с чистого dom дерева
         new EditorText(element, virtualElement);
       });
+
+    this.iframe.contentDocument.body
+      .querySelectorAll("[editableimgid]")
+      .forEach(element => {
+        const id = element.getAttribute("editableimgid");
+        const virtualElement = this.virtualDom.body.querySelector(
+          `[editableimgid="${id}"]`
+        );
+        new EditorImages(element, virtualElement);
+      });
   }
 
   injectStyles() {
@@ -117,7 +129,12 @@ export default class Editor extends Component {
     text-editor:focus {
       outline: 2px solid orange;
       outline-offset: 5px;
-    }`;
+    }
+    [editableimgid]:hover {
+      outline: 2px solid coral;
+      outline-offset: 5px;
+    }
+    `;
     this.iframe.contentDocument.head.appendChild(style);
   }
 
@@ -215,6 +232,12 @@ export default class Editor extends Component {
         {console.log("render")}
 
         <iframe src="" frameBorder="0"></iframe>
+        <input
+          id="img-upload"
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+        />
 
         {spinner}
 

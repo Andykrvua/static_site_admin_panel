@@ -236,6 +236,66 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./app/src/components/editor-images/editor-images.js":
+/*!***********************************************************!*\
+  !*** ./app/src/components/editor-images/editor-images.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EditorImages; });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+
+class EditorImages {
+  constructor(element, virtualElement) {
+    this.element = element;
+    this.virtualElement = virtualElement;
+    this.element.addEventListener("click", () => this.onClick());
+    this.imgUploader = document.querySelector("#img-upload");
+  }
+
+  onClick() {
+    this.imgUploader.click(); // симмуляция клика на элементе инпута
+
+    this.imgUploader.addEventListener("change", () => {
+      // когда пользователь выбрал изображение
+      if (this.imgUploader.files && this.imgUploader.files[0]) {
+        // проверим есть ли оно на самом деле
+        let formData = new FormData();
+        formData.append("image", this.imgUploader.files[0]); // поместим изображение в объект
+
+        axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("./api/uploadImage.php", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data" // установим нужный заголовок, иначе сервер не поймет
+
+          }
+        });
+      }
+    });
+  }
+
+}
+
+/***/ }),
+
+/***/ "./app/src/components/editor-images/index.js":
+/*!***************************************************!*\
+  !*** ./app/src/components/editor-images/index.js ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _editor_images__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./editor-images */ "./app/src/components/editor-images/editor-images.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_editor_images__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
 /***/ "./app/src/components/editor-meta/editor-meta.js":
 /*!*******************************************************!*\
   !*** ./app/src/components/editor-meta/editor-meta.js ***!
@@ -265,6 +325,12 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
     this.getMeta(this.props.virtualDom);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.virtualDom !== this.props.virtualDom) {
+      this.getMeta(this.props.virtualDom);
+    }
+  }
+
   getMeta(virtualDom) {
     this.title = virtualDom.head.querySelector("title") || virtualDom.head.appendChild(virtualDom.createElement("title"));
     this.description = virtualDom.head.querySelector("meta[name='description']");
@@ -272,6 +338,7 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
     if (!this.description) {
       this.description = virtualDom.head.appendChild(virtualDom.createElement("meta"));
       this.description.setAttribute("name", "description");
+      this.description.setAttribute("content", "");
     }
 
     this.keywords = virtualDom.head.querySelector("meta[name='keywords']");
@@ -279,6 +346,7 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
     if (!this.keywords) {
       this.keywords = virtualDom.head.appendChild(virtualDom.createElement("meta"));
       this.keywords.setAttribute("name", "keywords");
+      this.keywords.setAttribute("content", "");
     }
 
     this.setState({
@@ -297,11 +365,47 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
   }
 
   onValueChange(e) {
-    this.setState({
-      meta: {
-        title: e.target.value
-      }
-    });
+    if (e.target.getAttribute("data-title")) {
+      e.persist(); // для доступа к свойствам событий асинхронным способом
+
+      this.setState(({
+        meta
+      }) => {
+        // колбек нужен что бы текущий стейт зависел от предыдущего (отключаем асинхронность)
+        const newMeta = { // что бы избежать отдельных мутаций сначала копируем старый стейт
+          ...meta,
+          title: e.target.value
+        };
+        return {
+          // возвращаем новый стейт
+          meta: newMeta
+        };
+      });
+    } else if (e.target.getAttribute("data-key")) {
+      e.persist();
+      this.setState(({
+        meta
+      }) => {
+        const newMeta = { ...meta,
+          keywords: e.target.value
+        };
+        return {
+          meta: newMeta
+        };
+      });
+    } else {
+      e.persist();
+      this.setState(({
+        meta
+      }) => {
+        const newMeta = { ...meta,
+          description: e.target.value
+        };
+        return {
+          meta: newMeta
+        };
+      });
+    }
   }
 
   render() {
@@ -359,7 +463,7 @@ class EditorMeta extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
       onClick: () => {
         this.applyMeta();
       }
-    }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))));
+    }, "\u041F\u0440\u0438\u043C\u0435\u043D\u0438\u0442\u044C"))));
   }
 
 }
@@ -477,6 +581,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _choose_modal__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../choose-modal */ "./app/src/components/choose-modal/index.js");
 /* harmony import */ var _panel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../panel */ "./app/src/components/panel/index.js");
 /* harmony import */ var _editor_meta__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../editor-meta */ "./app/src/components/editor-meta/index.js");
+/* harmony import */ var _editor_images__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../editor-images */ "./app/src/components/editor-images/index.js");
+
 
 
 
@@ -528,6 +634,7 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(`../${page}?rnd=${Math.random().toString().substring(2)}`) // получаем код страницы в текстовом виде
     .then(res => _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
     .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
+    .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].wrapImages) // передаем DOM в метод, который добавит изображениям атрибут
     .then(dom => {
       this.virtualDom = dom; // создаем чистую копию редактируемого файла
 
@@ -548,9 +655,11 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     // сохраняем данные после редактирования
     this.isLoading(); // создаем копию отредактированного dom дерева
 
-    const newDom = this.virtualDom.cloneNode(this.virtualDom); // передаем методу что бы убрать кастомную обертку
+    const newDom = this.virtualDom.cloneNode(this.virtualDom);
+    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapTextNodes(newDom); // передаем методу что бы убрать кастомную обертку
 
-    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapTextNodes(newDom); // переводим в строку для отправки в php обработчик
+    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapImages(newDom); // передаем методу что бы убрать атрибут с изображений
+    // переводим в строку для отправки в php обработчик
 
     const html = _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].serializeDOMToString(newDom);
     await axios__WEBPACK_IMPORTED_MODULE_2___default.a // await говорит, дождаться окончания запроса прежде чем выполнить this.loadBackupsList();
@@ -568,6 +677,11 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
 
       new _editor_text__WEBPACK_IMPORTED_MODULE_5__["default"](element, virtualElement);
     });
+    this.iframe.contentDocument.body.querySelectorAll("[editableimgid]").forEach(element => {
+      const id = element.getAttribute("editableimgid");
+      const virtualElement = this.virtualDom.body.querySelector(`[editableimgid="${id}"]`);
+      new _editor_images__WEBPACK_IMPORTED_MODULE_12__["default"](element, virtualElement);
+    });
   }
 
   injectStyles() {
@@ -580,7 +694,12 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     text-editor:focus {
       outline: 2px solid orange;
       outline-offset: 5px;
-    }`;
+    }
+    [editableimgid]:hover {
+      outline: 2px solid coral;
+      outline-offset: 5px;
+    }
+    `;
     this.iframe.contentDocument.head.appendChild(style);
   }
 
@@ -676,6 +795,13 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, console.log("render"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("iframe", {
       src: "",
       frameBorder: "0"
+    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+      id: "img-upload",
+      type: "file",
+      accept: "image/*",
+      style: {
+        display: "none"
+      }
     }), spinner, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_panel__WEBPACK_IMPORTED_MODULE_10__["default"], null), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_confirm_modal__WEBPACK_IMPORTED_MODULE_8__["default"], {
       modal: modal,
       target: "modal-save",
@@ -873,6 +999,19 @@ class DOMHelper {
     // метод убирает кастомную обертку с наших dom ущлов
     dom.body.querySelectorAll("text-editor").forEach(element => {
       element.parentNode.replaceChild(element.firstChild, element);
+    });
+  }
+
+  static wrapImages(dom) {
+    dom.body.querySelectorAll("img").forEach((img, i) => {
+      img.setAttribute("editableimgid", i);
+    });
+    return dom;
+  }
+
+  static unwrapImages(dom) {
+    dom.body.querySelectorAll("[editableimgid]").forEach(img => {
+      img.removeAttribute("editableimgid");
     });
   }
 
