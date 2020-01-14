@@ -16,11 +16,18 @@ export default class EditorImages {
         // проверим есть ли оно на самом деле
         let formData = new FormData();
         formData.append("image", this.imgUploader.files[0]); // поместим изображение в объект
-        axios.post("./api/uploadImage.php", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data" // установим нужный заголовок, иначе сервер не поймет
-          }
-        });
+        axios
+          .post("./api/uploadImage.php", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data" // установим нужный заголовок, иначе сервер не поймет
+            }
+          })
+          .then(res => {
+            // значение сразу двум переменным
+            this.virtualElement.src = this.element.src = `./img/${res.data.src}`;
+            // сбрасываем данные в инпуте иначе после загрузки первого изображения, скрипт до перезагрузки не будет реагировать на новые значения
+            this.imgUploader.value = "";
+          });
       }
     });
   }

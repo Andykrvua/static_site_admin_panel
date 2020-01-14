@@ -272,6 +272,11 @@ class EditorImages {
             "Content-Type": "multipart/form-data" // установим нужный заголовок, иначе сервер не поймет
 
           }
+        }).then(res => {
+          // значение сразу двум переменным
+          this.virtualElement.src = this.element.src = `./img/${res.data.src}`; // сбрасываем данные в инпуте иначе после загрузки первого изображения, скрипт до перезагрузки не будет реагировать на новые значения
+
+          this.imgUploader.value = "";
         });
       }
     });
