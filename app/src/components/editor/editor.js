@@ -10,6 +10,7 @@ import ChooseModal from "./../choose-modal";
 import Panel from "./../panel";
 import EditorMeta from "./../editor-meta";
 import EditorImages from "./../editor-images";
+import Login from "./../login";
 
 export default class Editor extends Component {
   constructor() {
@@ -21,7 +22,9 @@ export default class Editor extends Component {
       pageList: [],
       backupsList: [],
       newPageName: "",
-      loading: true
+      loading: true,
+      auth: false,
+      loginError: false
     };
     // this.createNewPage = this.createNewPage.bind(this);
     this.isLoading = this.isLoading.bind(this);
@@ -29,21 +32,54 @@ export default class Editor extends Component {
     this.save = this.save.bind(this);
     this.init = this.init.bind(this);
     this.restoreBackup = this.restoreBackup.bind(this);
+    this.login = this.login.bind(this);
   }
 
   componentDidMount() {
-    this.init(null, this.currentPage);
+    this.checkAuth();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.auth !== prevState.auth) {
+      this.init(null, this.currentPage);
+    }
+  }
+
+  checkAuth() {
+    axios.get("./api/checkAuth.php").then(res => {
+      this.setState({
+        auth: res.data.auth
+      });
+    });
+  }
+
+  login(pass) {
+    axios.post("./api/login.php", { password: pass }).then(res => {
+      this.setState({
+        auth: res.data.auth,
+        loginError: !res.data.auth
+      });
+    });
+  }
+
+  logout() {
+    axios.get("./api/logout.php").then(() => {
+      window.location.replace("/admin/");
+    });
   }
 
   init(e, page) {
     if (e) {
       e.preventDefault();
     }
-    this.isLoading();
-    this.iframe = document.querySelector("iframe");
-    this.open(page, this.isLoaded);
-    this.loadPageList();
-    this.loadBackupsList();
+
+    if (this.state.auth) {
+      this.isLoading();
+      this.iframe = document.querySelector("iframe");
+      this.open(page, this.isLoaded);
+      this.loadPageList();
+      this.loadBackupsList();
+    }
   }
 
   open(page, cb) {
@@ -73,7 +109,7 @@ export default class Editor extends Component {
     this.loadBackupsList();
   }
 
-  async save(onSuccess, onError) {
+  async save() {
     // async говорит что внутри асинхронные операции
     // сохраняем данные после редактирования
 
@@ -89,8 +125,8 @@ export default class Editor extends Component {
     const html = DOMHelper.serializeDOMToString(newDom);
     await axios // await говорит, дождаться окончания запроса прежде чем выполнить this.loadBackupsList();
       .post("./api/savePage.php", { pageName: this.currentPage, html })
-      .then(onSuccess)
-      .catch(onError)
+      .then(() => this.showNotifications("Изменения сохранены", "success"))
+      .catch(() => this.showNotifications("Ошибка сохранения", "danger"))
       .finally(this.isLoaded);
 
     this.loadBackupsList();
@@ -115,7 +151,13 @@ export default class Editor extends Component {
         const virtualElement = this.virtualDom.body.querySelector(
           `[editableimgid="${id}"]`
         );
-        new EditorImages(element, virtualElement);
+        new EditorImages(
+          element,
+          virtualElement,
+          this.isLoading,
+          this.isLoaded,
+          this.showNotifications
+        );
       });
   }
 
@@ -136,6 +178,10 @@ export default class Editor extends Component {
     }
     `;
     this.iframe.contentDocument.head.appendChild(style);
+  }
+
+  showNotifications(message, status) {
+    UIkit.notification({ message, status });
   }
 
   loadPageList() {
@@ -175,27 +221,6 @@ export default class Editor extends Component {
       });
   }
 
-  // createNewPage() {
-  //   axios
-  //     .post("./api/createNewPage.php", { name: this.state.newPageName })
-  //     .then(res => {
-  //       console.log(res);
-  //       this.setState({ newPageName: "" });
-  //       this.loadPageList();
-  //     })
-  //     .catch(() => alert("Такая страница уже существует"));
-  // }
-
-  // deletePage(page) {
-  //   axios
-  //     .post("./api/deletePage.php", { name: page })
-  //     .then(res => {
-  //       console.log(res);
-  //       this.loadPageList();
-  //     })
-  //     .catch(() => alert("Что-то пошло не так"));
-  // }
-
   isLoading() {
     this.setState({
       loading: true
@@ -210,22 +235,14 @@ export default class Editor extends Component {
 
   render() {
     const modal = true;
-    const { loading, pageList, backupsList } = this.state;
+    const { loading, pageList, backupsList, auth, loginError } = this.state;
     let spinner;
 
     loading ? (spinner = <Spinner active />) : (spinner = <Spinner />);
-    // console.log("render");
-    // const { pageList } = this.state;
-    // const pages = pageList.map((page, i) => {
-    //   return (
-    //     <h1 key={i}>
-    //       {page}
-    //       <a href="#" onClick={() => this.deletePage(page)}>
-    //         (x)
-    //       </a>
-    //     </h1>
-    //   );
-    // });
+
+    if (!auth) {
+      return <Login login={this.login} loginError={loginError} />;
+    }
 
     return (
       <>
@@ -243,19 +260,42 @@ export default class Editor extends Component {
 
         <Panel />
 
-        <ConfirmModal modal={modal} target={"modal-save"} method={this.save} />
+        <ConfirmModal
+          modal={modal}
+          target={"modal-save"}
+          method={this.save}
+          text={{
+            title: "Сохранение",
+            descr: "Вы действительно хотите сохранить изменения?",
+            btn: "Сохранить"
+          }}
+        />
+
+        <ConfirmModal
+          modal={modal}
+          target={"modal-logout"}
+          method={this.logout}
+          text={{
+            title: "Выход",
+            descr: "Вы действительно хотите выйти?",
+            btn: "Выйти"
+          }}
+        />
+
         <ChooseModal
           modal={modal}
           target={"modal-open"}
           data={pageList}
           redirect={this.init}
         />
+
         <ChooseModal
           modal={modal}
           target={"modal-backup"}
           data={backupsList}
           redirect={this.restoreBackup}
         />
+
         {this.virtualDom ? (
           <EditorMeta
             modal={modal}
@@ -266,15 +306,6 @@ export default class Editor extends Component {
           false
         )}
       </>
-      // <>
-      //   <input
-      //     type="text"
-      //     value={this.state.newPageName}
-      //     onChange={event => this.setState({ newPageName: event.target.value })}
-      //   />
-      //   <button onClick={this.createNewPage}>Создать страницу</button>
-      //   {pages}
-      // </>
     );
   }
 }

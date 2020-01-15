@@ -177,16 +177,19 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! uikit */ "./node_modules/uikit/dist/js/uikit.js");
-/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(uikit__WEBPACK_IMPORTED_MODULE_1__);
-
 
 
 const ConfirmModal = ({
   modal,
   target,
-  method
+  method,
+  text
 }) => {
+  const {
+    title,
+    descr,
+    btn
+  } = text;
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     id: target,
     "uk-modal": modal.toString()
@@ -194,27 +197,17 @@ const ConfirmModal = ({
     className: "uk-modal-dialog uk-modal-body"
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
     className: "uk-modal-title"
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "\u0412\u044B \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0445\u043E\u0442\u0438\u0442\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F?"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+  }, title), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, descr), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
     className: "uk-text-right"
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     className: "uk-button uk-button-default uk-modal-close uk-margin-small-right",
     type: "button"
   }, "\u041E\u0442\u043C\u0435\u043D\u0430"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    onClick: () => method(() => {
-      uikit__WEBPACK_IMPORTED_MODULE_1___default.a.notification({
-        message: "Изменения сохранены",
-        status: "success"
-      });
-    }, () => {
-      uikit__WEBPACK_IMPORTED_MODULE_1___default.a.notification({
-        message: "Ошибка сохранения",
-        status: "danger"
-      });
-    }) // обернули в анонимную функцию что бы сохранить контекст, иначе нужен bind в конструторе
+    onClick: () => method() // обернули в анонимную функцию что бы сохранить контекст, иначе нужен bind в конструторе
     ,
     className: "uk-button uk-button-primary uk-modal-close",
     type: "button"
-  }, "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C"))));
+  }, btn))));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (ConfirmModal);
@@ -246,15 +239,21 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EditorImages; });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.promise.finally */ "./node_modules/core-js/modules/es.promise.finally.js");
+/* harmony import */ var core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+
 
 class EditorImages {
-  constructor(element, virtualElement) {
+  constructor(element, virtualElement, isLoading, isLoaded, showNotifications) {
     this.element = element;
     this.virtualElement = virtualElement;
     this.element.addEventListener("click", () => this.onClick());
     this.imgUploader = document.querySelector("#img-upload");
+    this.isLoading = isLoading;
+    this.isLoaded = isLoaded;
+    this.showNotifications = showNotifications;
   }
 
   onClick() {
@@ -267,7 +266,8 @@ class EditorImages {
         let formData = new FormData();
         formData.append("image", this.imgUploader.files[0]); // поместим изображение в объект
 
-        axios__WEBPACK_IMPORTED_MODULE_0___default.a.post("./api/uploadImage.php", formData, {
+        this.isLoading();
+        axios__WEBPACK_IMPORTED_MODULE_1___default.a.post("./api/uploadImage.php", formData, {
           headers: {
             "Content-Type": "multipart/form-data" // установим нужный заголовок, иначе сервер не поймет
 
@@ -277,6 +277,13 @@ class EditorImages {
           this.virtualElement.src = this.element.src = `./img/${res.data.src}`; // сбрасываем данные в инпуте иначе после загрузки первого изображения, скрипт до перезагрузки не будет реагировать на новые значения
 
           this.imgUploader.value = "";
+          this.showNotifications("Сохранено", "success");
+        }).catch(() => {
+          this.imgUploader.value = "";
+          this.showNotifications("Ошибка сохранения", "danger");
+        }).finally(() => {
+          this.imgUploader.value = "";
+          this.isLoaded();
         });
       }
     });
@@ -571,22 +578,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Editor; });
 /* harmony import */ var core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.promise.finally */ "./node_modules/core-js/modules/es.promise.finally.js");
 /* harmony import */ var core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_promise_finally__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./../../helpers/iframeLoader.js */ "./app/src/helpers/iframeLoader.js");
-/* harmony import */ var _helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../../helpers/dom-helper.js */ "./app/src/helpers/dom-helper.js");
-/* harmony import */ var _editor_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./../editor-text */ "./app/src/components/editor-text/index.js");
-/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! uikit */ "./node_modules/uikit/dist/js/uikit.js");
-/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(uikit__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _spinner__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./../spinner */ "./app/src/components/spinner/index.js");
-/* harmony import */ var _confirm_modal__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./../confirm-modal */ "./app/src/components/confirm-modal/index.js");
-/* harmony import */ var _choose_modal__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../choose-modal */ "./app/src/components/choose-modal/index.js");
-/* harmony import */ var _panel__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../panel */ "./app/src/components/panel/index.js");
-/* harmony import */ var _editor_meta__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../editor-meta */ "./app/src/components/editor-meta/index.js");
-/* harmony import */ var _editor_images__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../editor-images */ "./app/src/components/editor-images/index.js");
+/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
+/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./../../helpers/iframeLoader.js */ "./app/src/helpers/iframeLoader.js");
+/* harmony import */ var _helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_helpers_iframeLoader_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./../../helpers/dom-helper.js */ "./app/src/helpers/dom-helper.js");
+/* harmony import */ var _editor_text__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./../editor-text */ "./app/src/components/editor-text/index.js");
+/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! uikit */ "./node_modules/uikit/dist/js/uikit.js");
+/* harmony import */ var uikit__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(uikit__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _spinner__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./../spinner */ "./app/src/components/spinner/index.js");
+/* harmony import */ var _confirm_modal__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../confirm-modal */ "./app/src/components/confirm-modal/index.js");
+/* harmony import */ var _choose_modal__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../choose-modal */ "./app/src/components/choose-modal/index.js");
+/* harmony import */ var _panel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../panel */ "./app/src/components/panel/index.js");
+/* harmony import */ var _editor_meta__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./../editor-meta */ "./app/src/components/editor-meta/index.js");
+/* harmony import */ var _editor_images__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./../editor-images */ "./app/src/components/editor-images/index.js");
+/* harmony import */ var _login__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./../login */ "./app/src/components/login/index.js");
 
 
 
@@ -600,7 +610,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
+
+
+class Editor extends react__WEBPACK_IMPORTED_MODULE_2__["Component"] {
   constructor() {
     super();
     this.currentPage = "index.html";
@@ -608,7 +620,9 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
       pageList: [],
       backupsList: [],
       newPageName: "",
-      loading: true
+      loading: true,
+      auth: false,
+      loginError: false
     }; // this.createNewPage = this.createNewPage.bind(this);
 
     this.isLoading = this.isLoading.bind(this);
@@ -616,10 +630,42 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     this.save = this.save.bind(this);
     this.init = this.init.bind(this);
     this.restoreBackup = this.restoreBackup.bind(this);
+    this.login = this.login.bind(this);
   }
 
   componentDidMount() {
-    this.init(null, this.currentPage);
+    this.checkAuth();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.auth !== prevState.auth) {
+      this.init(null, this.currentPage);
+    }
+  }
+
+  checkAuth() {
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("./api/checkAuth.php").then(res => {
+      this.setState({
+        auth: res.data.auth
+      });
+    });
+  }
+
+  login(pass) {
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("./api/login.php", {
+      password: pass
+    }).then(res => {
+      this.setState({
+        auth: res.data.auth,
+        loginError: !res.data.auth
+      });
+    });
+  }
+
+  logout() {
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("./api/logout.php").then(() => {
+      window.location.replace("/admin/");
+    });
   }
 
   init(e, page) {
@@ -627,51 +673,53 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
       e.preventDefault();
     }
 
-    this.isLoading();
-    this.iframe = document.querySelector("iframe");
-    this.open(page, this.isLoaded);
-    this.loadPageList();
-    this.loadBackupsList();
+    if (this.state.auth) {
+      this.isLoading();
+      this.iframe = document.querySelector("iframe");
+      this.open(page, this.isLoaded);
+      this.loadPageList();
+      this.loadBackupsList();
+    }
   }
 
   open(page, cb) {
     this.currentPage = page;
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(`../${page}?rnd=${Math.random().toString().substring(2)}`) // получаем код страницы в текстовом виде
-    .then(res => _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
-    .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
-    .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].wrapImages) // передаем DOM в метод, который добавит изображениям атрибут
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.get(`../${page}?rnd=${Math.random().toString().substring(2)}`) // получаем код страницы в текстовом виде
+    .then(res => _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].parseStrToDom(res.data)) // парсим код преваращая в DOM структуру
+    .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].wrapTextNodes) // передаем DOM в метод, который обернет нужные узлы в text-editor
+    .then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].wrapImages) // передаем DOM в метод, который добавит изображениям атрибут
     .then(dom => {
       this.virtualDom = dom; // создаем чистую копию редактируемого файла
 
       return dom; // что бы не обрывать цепочку вызовов вернем ранее полученный dom
-    }).then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].serializeDOMToString) // готовим к отправке в php, переводим в строку
-    .then(html => axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/saveTempPage.php", {
+    }).then(_helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].serializeDOMToString) // готовим к отправке в php, переводим в строку
+    .then(html => axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("./api/saveTempPage.php", {
       html
     })) // отправляем в api для сохранения
     .then(() => this.iframe.load("./../f45ds615dsvvds1v5.html")) // получаем сохраненную копию
-    .then(() => axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/deleteTempPage.php")) // удаляем копию файла
+    .then(() => axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("./api/deleteTempPage.php")) // удаляем копию файла
     .then(() => this.enableEditing()) // включаем редактирование
     .then(() => this.injectStyles()).then(cb);
     this.loadBackupsList();
   }
 
-  async save(onSuccess, onError) {
+  async save() {
     // async говорит что внутри асинхронные операции
     // сохраняем данные после редактирования
     this.isLoading(); // создаем копию отредактированного dom дерева
 
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
-    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapTextNodes(newDom); // передаем методу что бы убрать кастомную обертку
+    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].unwrapTextNodes(newDom); // передаем методу что бы убрать кастомную обертку
 
-    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].unwrapImages(newDom); // передаем методу что бы убрать атрибут с изображений
+    _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].unwrapImages(newDom); // передаем методу что бы убрать атрибут с изображений
     // переводим в строку для отправки в php обработчик
 
-    const html = _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_4__["default"].serializeDOMToString(newDom);
-    await axios__WEBPACK_IMPORTED_MODULE_2___default.a // await говорит, дождаться окончания запроса прежде чем выполнить this.loadBackupsList();
+    const html = _helpers_dom_helper_js__WEBPACK_IMPORTED_MODULE_5__["default"].serializeDOMToString(newDom);
+    await axios__WEBPACK_IMPORTED_MODULE_3___default.a // await говорит, дождаться окончания запроса прежде чем выполнить this.loadBackupsList();
     .post("./api/savePage.php", {
       pageName: this.currentPage,
       html
-    }).then(onSuccess).catch(onError).finally(this.isLoaded);
+    }).then(() => this.showNotifications("Изменения сохранены", "success")).catch(() => this.showNotifications("Ошибка сохранения", "danger")).finally(this.isLoaded);
     this.loadBackupsList();
   }
 
@@ -680,12 +728,12 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
       const id = element.getAttribute("nodeid");
       const virtualElement = this.virtualDom.body.querySelector(`[nodeid="${id}"]`); // передаем в констурктор элемент с нашего temp файла и тот же элемент с чистого dom дерева
 
-      new _editor_text__WEBPACK_IMPORTED_MODULE_5__["default"](element, virtualElement);
+      new _editor_text__WEBPACK_IMPORTED_MODULE_6__["default"](element, virtualElement);
     });
     this.iframe.contentDocument.body.querySelectorAll("[editableimgid]").forEach(element => {
       const id = element.getAttribute("editableimgid");
       const virtualElement = this.virtualDom.body.querySelector(`[editableimgid="${id}"]`);
-      new _editor_images__WEBPACK_IMPORTED_MODULE_12__["default"](element, virtualElement);
+      new _editor_images__WEBPACK_IMPORTED_MODULE_13__["default"](element, virtualElement, this.isLoading, this.isLoaded, this.showNotifications);
     });
   }
 
@@ -708,14 +756,21 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     this.iframe.contentDocument.head.appendChild(style);
   }
 
+  showNotifications(message, status) {
+    uikit__WEBPACK_IMPORTED_MODULE_7___default.a.notification({
+      message,
+      status
+    });
+  }
+
   loadPageList() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("./api/pageList.php").then(res => this.setState({
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("./api/pageList.php").then(res => this.setState({
       pageList: res.data
     }));
   }
 
   loadBackupsList() {
-    axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("./backups/backups.json").then(res => this.setState({
+    axios__WEBPACK_IMPORTED_MODULE_3___default.a.get("./backups/backups.json").then(res => this.setState({
       backupsList: res.data.filter(backup => {
         return backup.page === this.currentPage;
       })
@@ -727,40 +782,21 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
       e.preventDefault();
     }
 
-    uikit__WEBPACK_IMPORTED_MODULE_6___default.a.modal.confirm("Вы действительно хотите восстановить страницу из резервной копии? Все внесенные изменения будут утеряны!", {
+    uikit__WEBPACK_IMPORTED_MODULE_7___default.a.modal.confirm("Вы действительно хотите восстановить страницу из резервной копии? Все внесенные изменения будут утеряны!", {
       labels: {
         ok: "Восстановить",
         cancel: "Отмена"
       }
     }).then(() => {
       this.isLoading();
-      return axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("./api/restoreBackup.php", {
+      return axios__WEBPACK_IMPORTED_MODULE_3___default.a.post("./api/restoreBackup.php", {
         page: this.currentPage,
         file: backup
       });
     }).then(() => {
       this.open(this.currentPage, this.isLoaded);
     });
-  } // createNewPage() {
-  //   axios
-  //     .post("./api/createNewPage.php", { name: this.state.newPageName })
-  //     .then(res => {
-  //       console.log(res);
-  //       this.setState({ newPageName: "" });
-  //       this.loadPageList();
-  //     })
-  //     .catch(() => alert("Такая страница уже существует"));
-  // }
-  // deletePage(page) {
-  //   axios
-  //     .post("./api/deletePage.php", { name: page })
-  //     .then(res => {
-  //       console.log(res);
-  //       this.loadPageList();
-  //     })
-  //     .catch(() => alert("Что-то пошло не так"));
-  // }
-
+  }
 
   isLoading() {
     this.setState({
@@ -779,62 +815,65 @@ class Editor extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
     const {
       loading,
       pageList,
-      backupsList
+      backupsList,
+      auth,
+      loginError
     } = this.state;
     let spinner;
-    loading ? spinner = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_spinner__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    loading ? spinner = react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_spinner__WEBPACK_IMPORTED_MODULE_8__["default"], {
       active: true
-    }) : spinner = react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_spinner__WEBPACK_IMPORTED_MODULE_7__["default"], null); // console.log("render");
-    // const { pageList } = this.state;
-    // const pages = pageList.map((page, i) => {
-    //   return (
-    //     <h1 key={i}>
-    //       {page}
-    //       <a href="#" onClick={() => this.deletePage(page)}>
-    //         (x)
-    //       </a>
-    //     </h1>
-    //   );
-    // });
+    }) : spinner = react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_spinner__WEBPACK_IMPORTED_MODULE_8__["default"], null);
 
-    return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_1___default.a.Fragment, null, console.log("render"), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("iframe", {
+    if (!auth) {
+      return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_login__WEBPACK_IMPORTED_MODULE_14__["default"], {
+        login: this.login,
+        loginError: loginError
+      });
+    }
+
+    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, console.log("render"), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("iframe", {
       src: "",
       frameBorder: "0"
-    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("input", {
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement("input", {
       id: "img-upload",
       type: "file",
       accept: "image/*",
       style: {
         display: "none"
       }
-    }), spinner, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_panel__WEBPACK_IMPORTED_MODULE_10__["default"], null), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_confirm_modal__WEBPACK_IMPORTED_MODULE_8__["default"], {
+    }), spinner, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_panel__WEBPACK_IMPORTED_MODULE_11__["default"], null), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_confirm_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
       modal: modal,
       target: "modal-save",
-      method: this.save
-    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      method: this.save,
+      text: {
+        title: "Сохранение",
+        descr: "Вы действительно хотите сохранить изменения?",
+        btn: "Сохранить"
+      }
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_confirm_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      modal: modal,
+      target: "modal-logout",
+      method: this.logout,
+      text: {
+        title: "Выход",
+        descr: "Вы действительно хотите выйти?",
+        btn: "Выйти"
+      }
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_10__["default"], {
       modal: modal,
       target: "modal-open",
       data: pageList,
       redirect: this.init
-    }), react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_9__["default"], {
+    }), react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_choose_modal__WEBPACK_IMPORTED_MODULE_10__["default"], {
       modal: modal,
       target: "modal-backup",
       data: backupsList,
       redirect: this.restoreBackup
-    }), this.virtualDom ? react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_editor_meta__WEBPACK_IMPORTED_MODULE_11__["default"], {
+    }), this.virtualDom ? react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_editor_meta__WEBPACK_IMPORTED_MODULE_12__["default"], {
       modal: modal,
       target: "modal-meta",
       virtualDom: this.virtualDom
-    }) : false) // <>
-    //   <input
-    //     type="text"
-    //     value={this.state.newPageName}
-    //     onChange={event => this.setState({ newPageName: event.target.value })}
-    //   />
-    //   <button onClick={this.createNewPage}>Создать страницу</button>
-    //   {pages}
-    // </>
-    ;
+    }) : false);
   }
 
 }
@@ -853,6 +892,86 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _editor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./editor */ "./app/src/components/editor/editor.js");
 
 /* harmony default export */ __webpack_exports__["default"] = (_editor__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/login/index.js":
+/*!*******************************************!*\
+  !*** ./app/src/components/login/index.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _login__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./login */ "./app/src/components/login/login.js");
+
+/* harmony default export */ __webpack_exports__["default"] = (_login__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./app/src/components/login/login.js":
+/*!*******************************************!*\
+  !*** ./app/src/components/login/login.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Login; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+class Login extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
+  constructor(props) {
+    super(props);
+    this.state = {
+      pass: ""
+    };
+  }
+
+  onPasswordCahnge(e) {
+    this.setState({
+      pass: e.target.value
+    });
+  }
+
+  render() {
+    const {
+      pass
+    } = this.state;
+    const {
+      loginError
+    } = this.props;
+    let loginErr;
+    loginError ? loginErr = react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+      className: "login-error uk-margin-top"
+    }, "\u041D\u0435\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u044B\u0439 \u043F\u0430\u0440\u043E\u043B\u044C") : null;
+    return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "login-container"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "login"
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+      className: "uk-modal-title uk-text-center"
+    }, "\u0410\u0432\u0442\u043E\u0440\u0438\u0437\u0430\u0446\u0438\u044F"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      className: "uk-margin-top uk-tet-lead"
+    }, "\u041F\u0430\u0440\u043E\u043B\u044C:"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("input", {
+      type: "password",
+      name: "",
+      id: "",
+      className: "uk-input uk-margin-top",
+      placeholder: "\u041F\u0430\u0440\u043E\u043B\u044C",
+      value: pass,
+      onChange: e => this.onPasswordCahnge(e)
+    }), loginErr, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+      className: "uk-margin-top uk-button uk-button-primary",
+      type: "button",
+      onClick: () => this.props.login(pass)
+    }, "\u0412\u0445\u043E\u0434")));
+  }
+
+}
 
 /***/ }),
 
@@ -899,7 +1018,10 @@ const Panel = () => {
   }, "\u041C\u0435\u0442\u0430\u0442\u0435\u0433\u0438"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     "uk-toggle": "target: #modal-backup",
     className: "uk-button uk-button-default"
-  }, "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438"));
+  }, "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    "uk-toggle": "target: #modal-logout",
+    className: "uk-button uk-button-danger uk-margin-small-left"
+  }, "\u0412\u044B\u0439\u0442\u0438"));
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (Panel);

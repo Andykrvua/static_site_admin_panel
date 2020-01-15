@@ -1,7 +1,12 @@
 <?php
 
-// название файла для удаления
+session_start();
+if ($_SESSION["auth"] != true) {
+    header("HTTP/1.0 403 Forbidden");
+    die;
+}
 
+// название файла для удаления
 $file = "./../../f45ds615dsvvds1v5.html";
 
 if (file_exists($file)) {

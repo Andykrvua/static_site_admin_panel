@@ -1,5 +1,11 @@
 <?php
 
+session_start();
+if ($_SESSION["auth"] != true) {
+    header("HTTP/1.0 403 Forbidden");
+    die;
+}
+
 // проверяем есть ли файл и проверяем загружен ли он
 if (file_exists($_FILES["image"]["tmp_name"]) && is_uploaded_file($_FILES["image"]["tmp_name"])) {
 
@@ -7,6 +13,10 @@ if (file_exists($_FILES["image"]["tmp_name"]) && is_uploaded_file($_FILES["image
     $fileExt = explode("/", $_FILES["image"]["type"])[1];
 
     $fileName = uniqid() . "." . $fileExt;
+
+    if (!is_dir("./../../img/")) {
+        mkdir("./../../img/");
+    }
 
     // функция перемещает полученный файл, файлы всегда лежат в массиве _FILES
     // первый аргумент что за данные и имя файла, в данном случае tmp_name, второй аргумент это путь

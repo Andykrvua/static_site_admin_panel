@@ -1,7 +1,13 @@
 <?php
+
+session_start();
+if ($_SESSION["auth"] != true) {
+    header("HTTP/1.0 403 Forbidden");
+    die;
+}
 // сохраняем данные после редактирования и создаем файл бекапа
 
-// готовим данные для получения 
+// готовим данные для получения в формате json
 $_POST = json_decode(file_get_contents("php://input"), true);
 
 // имя страницы для сохранения данных

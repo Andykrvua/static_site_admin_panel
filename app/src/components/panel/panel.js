@@ -30,6 +30,13 @@ const Panel = () => {
       >
         Резервные копии
       </button>
+
+      <button
+        uk-toggle="target: #modal-logout"
+        className="uk-button uk-button-danger uk-margin-small-left"
+      >
+        Выйти
+      </button>
     </div>
   );
 };
